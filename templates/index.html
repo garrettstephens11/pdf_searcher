@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>PDF Searcher</title>
+</head>
+<body>
+    <h1>PDF Searcher</h1>
+    <form id="search_form" enctype="multipart/form-data">
+        <label for="pdf_file">Upload PDF:</label>
+        <input type="file" name="pdf_file" accept=".pdf" required>
+        <br>
+        <label for="search_term">Search term:</label>
+        <input type="text" name="search_term" required>
+        <br>
+        <button type="submit">Search</button>
+    </form>
+    <pre id="search_results" style="white-space: pre-wrap;"></pre>
+    <button id="copy_to_clipboard" style="display: none;">Copy to Clipboard</button>
+
+    <script>
+        const form = document.getElementById('search_form');
+        const searchResults = document.getElementById('search_results');
+        const copyToClipboardButton = document.getElementById('copy_to_clipboard');
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const formData = new FormData(form);
+            formData.append('search_term', form.search_term.value);
+
+            const response = await fetch('/', { method: 'POST', body: formData });
+            const data = await response.json();
+
+            let resultText = '';
+            data.forEach(result => {
+                resultText += `Sentence: ${result.sentence}\nParagraph: ${result.paragraph}\nPage Number: ${result.page_number}\n\n`;
+            });
+
+            searchResults.textContent = resultText;
+
+            if (resultText.trim() !== '') {
+                copyToClipboardButton.style.display = 'inline';
+            } else {
+                copyToClipboardButton.style.display = 'none';
+            }
+        });
+
+        copyToClipboardButton.addEventListener('click', () => {
+            const range = document.createRange();
+            range.selectNode(searchResults);
+            window.getSelection().removeAllRanges();
+            window.getSelection().addRange(range);
+            document.execCommand('copy');
+            window.getSelection().removeAllRanges();
+            alert('Results copied to clipboard');
+        });
+    </script>
+</body>
+</html>
