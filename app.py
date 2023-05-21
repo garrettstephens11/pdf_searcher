@@ -8,8 +8,8 @@ app = Flask(__name__)
 executor = ThreadPoolExecutor(max_workers=5)
 
 def clean_text(text):
-    # Remove multiple spaces
-    cleaned_text = re.sub(' +', ' ', text)
+    # Replace multiple whitespaces, newlines, and tabs with a single space
+    cleaned_text = re.sub(r'\s+', ' ', text)
 
     # Split the text into sentences
     sentences = cleaned_text.split('. ')

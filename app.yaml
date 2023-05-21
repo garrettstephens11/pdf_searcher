@@ -1,0 +1,12 @@
+runtime: python39  # or any supported version
+instance_class: F2
+entrypoint: gunicorn -b :$PORT app:app  # replace 'app:app' with 'yourfilename:app' if your main file is not 'app.py'
+
+automatic_scaling:
+  target_cpu_utilization: 0.65
+  min_instances: 1
+  max_instances: 10
+
+env_variables:
+  SECRET_KEY: "your-secret-key"  # replace with your actual secret key
+
