@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PDF Book Club</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            $(".generate-discussion").click(function(event){
+                event.preventDefault();
+
+                var button = $(this);
+                var form = button.parent();
+                var segmentDiv = button.closest('.segment');
+                
+                $.ajax({
+                    type: form.attr('method'),
+                    url: form.attr('action'),
+                    data: form.serialize(),
+                    success: function(response){
+                        // Format the discussion
+                        var formattedDiscussion = response.discussion
+                            .replace(/Person A:/g, '</p><p><strong>Person A:</strong>')
+                            .replace(/Person B:/g, '</p><p><strong>Person B:</strong>')
+                            .replace(/Person C:/g, '</p><p><strong>Person C:</strong>')
+                            .substring(4) + '</p>';  // Remove the leading '</p>'
+
+                        // Add the discussion to the page
+                        segmentDiv.append('<h3>Discussion</h3>' + formattedDiscussion);
+                        // Disable the button to prevent re-generating the discussion
+                        button.prop('disabled', true);
+                    },
+                    error: function(error){
+                        console.log(error);
+                    }
+                });
+            });
+        });
+    </script>
+</head>
+<body>
+    <h1>PDF Book Club</h1>
+
+    {% for index, segment in segments %}
+        <div class="segment">
+            <h2>Segment {{ index + 1 }}</h2>
+            <p>{{ segment.replace('\n', '<br>')|safe }}</p>
+
+            <form method="POST" action="{{ url_for('generate') }}">
+                <input type="hidden" name="index" value="{{ index }}">
+                <input type="hidden" name="segment" value="{{ segment }}">
+                <input type="button" class="generate-discussion" value="Generate Discussion">
+            </form>
+
+            {% if discussions and index|string in discussions %}
+                <h3>Discussion</h3>
+                <p>{{ discussions[index|string] }}</p>
+            {% endif %}
+        </div>
+    {% endfor %}
+</body>
+</html>
